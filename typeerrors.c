@@ -1,65 +1,30 @@
 //Write a program in C to check type expressions and produce type errors
 #include <stdio.h>
-#include <stdlib.h>
-typedef enum {
-NODE_CONSTANT,
-NODE_VARIABLE,
-NODE_BINARY_OPERATION,
-NODE_ASSIGNMENT
-} NodeType;
-typedef struct Node {
-NodeType type;
-char* value;
-struct Node* left;
-struct Node* right;
-} Node;
-Node* createNode(NodeType type, char* value, Node* left, Node*
-right)
-{
-Node* newNode = (Node*)malloc(sizeof(Node));
-if (newNode == NULL) {
-perror("Memory allocation failed");
-exit(EXIT_FAILURE);
+
+// Function to check the type of expressions
+void checkType(int a, float b) {
+    // Check if both operands are integers
+    if (a == (int)a && b == (int)b) {
+        printf("Both operands are integers.\n");
+    } 
+    // Check if both operands are floats
+    else if (a != (int)a && b != (int)b) {
+        printf("Both operands are floats.\n");
+    } 
+    // Otherwise, operands have different types
+    else {
+        printf("Type error: Operands have different types.\n");
+    }
 }
-newNode->type = type;
-newNode->value = value;
-newNode->left = left;
-newNode->right = right;
-return newNode;
-}
-void generateIntermediateCode(Node* root, char* coderName) {
-if (root == NULL) {
-return;
-}
-switch (root->type) {
-case NODE_CONSTANT:
-printf("%s: LOAD %s\n", coderName, root->value);
-break;
-case NODE_VARIABLE:
-printf("%s: READ %s\n", coderName, root->value);
-break;
-case NODE_BINARY_OPERATION:
-generateIntermediateCode(root->left, coderName);
-generateIntermediateCode(root->right, coderName);
-printf("%s: OP %s\n", coderName, root->value);
-break;
-case NODE_ASSIGNMENT:
-generateIntermediateCode(root->right, coderName);
-printf("%s: STORE %s\n", coderName, root->left->value);
-break;
-default:
-fprintf(stderr, "Unknown node type\n");
-exit(EXIT_FAILURE);
-}
-}
+
 int main() {
-Node* syntaxTree = createNode(NODE_ASSIGNMENT, "x",
-createNode(NODE_VARIABLE, "y", NULL, NULL),
-createNode(NODE_BINARY_OPERATION, "+",
-createNode(NODE_CONSTANT, "5", NULL, NULL),
-createNode(NODE_CONSTANT, "3", NULL, NULL)
-)
-);
-generateIntermediateCode(syntaxTree, "RIYA"); // Example
-return 0;
+    int integerOperand = 5;
+    float floatOperand = 3.5;
+    
+    // Test cases
+    checkType(integerOperand, floatOperand); // Type error: Operands have different types.
+    checkType(integerOperand, 2); // Both operands are integers.
+    checkType(2.5, floatOperand); // Both operands are floats.
+
+    return 0;
 }
