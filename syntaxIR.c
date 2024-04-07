@@ -1,54 +1,65 @@
-//Write a program to convert an annotated syntax tree to intermediate code.
+//Write a program in C to check type expressions and produce type errors
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-#define MAX_CHILDREN 5
-#define MAX_TOKEN_LENGTH 50
-
+typedef enum {
+NODE_CONSTANT,
+NODE_VARIABLE,
+NODE_BINARY_OPERATION,
+NODE_ASSIGNMENT
+} NodeType;
 typedef struct Node {
-    char token[MAX_TOKEN_LENGTH];
-    int type; // 0 - Identifier, 1 - Constant, 2 - Operator
-    int value; // Used for constants
-    struct Node *children[MAX_CHILDREN];
-    int numChildren;
+NodeType type;
+char* value;
+struct Node* left;
+struct Node* right;
 } Node;
-
-Node *createNode(char *token, int type, int value) {
-    Node *newNode = (Node *)malloc(sizeof(Node));
-    strcpy(newNode->token, token);
-    newNode->type = type;
-    newNode->value = value;
-    newNode->numChildren = 0;
-    return newNode;
+Node* createNode(NodeType type, char* value, Node* left, Node*
+right)
+{
+Node* newNode = (Node*)malloc(sizeof(Node));
+if (newNode == NULL) {
+perror("Memory allocation failed");
+exit(EXIT_FAILURE);
 }
-
-void addChild(Node *parent, Node *child) {
-    parent->children[parent->numChildren++] = child;
+newNode->type = type;
+newNode->value = value;
+newNode->left = left;
+newNode->right = right;
+return newNode;
 }
-
-void generateIntermediateCode(Node *root) {
-    if (root->type == 0) { // Identifier
-        printf("%s\n", root->token);
-    } else if (root->type == 1) { // Constant
-        printf("%d\n", root->value);
-    } else if (root->type == 2) { // Operator
-        generateIntermediateCode(root->children[0]);
-        generateIntermediateCode(root->children[1]);
-        printf("%s\n", root->token);
-    }
+void generateIntermediateCode(Node* root, char* coderName) {
+if (root == NULL) {
+return;
 }
-
+switch (root->type) {
+case NODE_CONSTANT:
+printf("%s: LOAD %s\n", coderName, root->value);
+break;
+case NODE_VARIABLE:
+printf("%s: READ %s\n", coderName, root->value);
+break;
+case NODE_BINARY_OPERATION:
+generateIntermediateCode(root->left, coderName);
+generateIntermediateCode(root->right, coderName);
+printf("%s: OP %s\n", coderName, root->value);
+break;
+case NODE_ASSIGNMENT:
+generateIntermediateCode(root->right, coderName);
+printf("%s: STORE %s\n", coderName, root->left->value);
+break;
+default:
+fprintf(stderr, "Unknown node type\n");
+exit(EXIT_FAILURE);
+}
+}
 int main() {
-    // Construct the annotated syntax tree
-    Node *root = createNode("+", 2, 0);
-    Node *left = createNode("x", 0, 0);
-    Node *right = createNode("5", 1, 5);
-    addChild(root, left);
-    addChild(root, right);
-
-    // Generate intermediate code
-    generateIntermediateCode(root);
-
-    return 0;
+Node* syntaxTree = createNode(NODE_ASSIGNMENT, "x",
+createNode(NODE_VARIABLE, "y", NULL, NULL),
+createNode(NODE_BINARY_OPERATION, "+",
+createNode(NODE_CONSTANT, "5", NULL, NULL),
+createNode(NODE_CONSTANT, "3", NULL, NULL)
+)
+);
+generateIntermediateCode(syntaxTree, "orzoo"); // Example
+return 0;
 }
